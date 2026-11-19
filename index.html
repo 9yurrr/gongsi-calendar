@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>공시 일정 달력</title>
+<style>
+:root{--bg:#fff;--fg:#111;--sub:#6b6b6b;--line:#e4e4e4;--soft:#f6f6f6;--sel:#111;--selfg:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141414;--fg:#eee;--sub:#9a9a9a;--line:#2c2c2c;--soft:#1d1d1d;--sel:#eee;--selfg:#111}}
+:root[data-theme="dark"]{--bg:#141414;--fg:#eee;--sub:#9a9a9a;--line:#2c2c2c;--soft:#1d1d1d;--sel:#eee;--selfg:#111}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 -apple-system,"Pretendard","Malgun Gothic",sans-serif}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+h1{font-size:20px;margin:0}
+.upd{color:var(--sub);font-size:13px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:18px 0 10px;flex-wrap:wrap}
+.nav{display:flex;align-items:center;gap:6px}
+.nav button{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;width:34px;height:34px;font-size:16px;cursor:pointer}
+.month{font-size:18px;font-weight:600;min-width:120px;text-align:center}
+.tabs{display:flex;gap:16px}
+.tabs button{border:0;background:none;color:var(--sub);font-size:14px;padding:4px 0;cursor:pointer;border-bottom:2px solid transparent}
+.tabs button.on{color:var(--fg);border-bottom-color:var(--fg);font-weight:600}
+.main{display:grid;grid-template-columns:1fr 320px;gap:20px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.wd{font-size:12px;color:var(--sub);text-align:center;padding:6px 0;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.day{min-height:92px;padding:6px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);cursor:pointer;background:var(--bg);text-align:left;font:inherit;color:inherit;border-top:0;border-left:0}
+.day:hover{background:var(--soft)}
+.day.out{color:var(--sub);opacity:.45}
+.day .n{font-size:13px;font-weight:600}
+.day.today .n{text-decoration:underline;text-underline-offset:3px}
+.day.sel{background:var(--sel);color:var(--selfg)}
+.day.sel .ev,.day.sel .more{color:var(--selfg)}
+.ev{font-size:11.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.more{font-size:11px;color:var(--sub);margin-top:2px}
+.cnt{display:none;font-size:12px;color:var(--sub);margin-top:4px}
+aside{border:1px solid var(--line);border-radius:8px;padding:16px;align-self:start;position:sticky;top:16px}
+aside h2{font-size:16px;margin:0 0 12px}
+.item{padding:10px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0;padding-top:0}
+.cat{font-size:12px;color:var(--sub)}
+.tt{font-weight:600}
+.ss{font-size:13px;color:var(--sub)}
+.item a{color:inherit;font-size:13px}
+.empty{color:var(--sub);font-size:14px}
+.note{color:var(--sub);font-size:12px;margin-top:24px}
+@media (max-width:760px){
+  .main{grid-template-columns:1fr}
+  aside{position:static}
+  .day{min-height:56px;padding:4px}
+  .ev,.more{display:none}
+  .cnt{display:block}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>공시 일정 달력</h1>
+    <span class="upd">갱신 2026-11-19 16:57</span>
+  </header>
+  <div class="bar">
+    <div class="nav">
+      <button id="prev" aria-label="이전 달">‹</button>
+      <span class="month" id="month"></span>
+      <button id="next" aria-label="다음 달">›</button>
+    </div>
+    <div class="tabs" id="tabs"></div>
+  </div>
+  <div class="main">
+    <div>
+      <div class="grid" id="grid"></div>
+    </div>
+    <aside id="side"></aside>
+  </div>
+  <p class="note">국내: DART 유상·무상증자 공시에서 추출 · 미국 지표: 중요도 높음만, 한국시간 · 미국 실적: 시가총액 500억 달러 이상. 투자 권유가 아닌 일정 정보입니다.</p>
+</div>
+<script>
+const EV = [{"d": "2026-11-27", "c": "국내", "t": "납입 · 타임X AI", "s": "유상증자(제3자배정) · 3,764,000주 · 발행가 1,165원", "u": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261119000223"}, {"d": "2026-11-30", "c": "국내", "t": "납입 · 광진실업", "s": "유상증자(제3자배정) · 2,502,090주 · 발행가 1,199원", "u": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261119000297"}, {"d": "2026-12-11", "c": "국내", "t": "신주상장 · 타임X AI", "s": "유상증자(제3자배정) · 3,764,000주 · 발행가 1,165원", "u": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261119000223"}, {"d": "2026-12-15", "c": "국내", "t": "납입 · 에넥스", "s": "유상증자(제3자배정) · 2,000,000주 · 발행가 2,500원", "u": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261119000305"}, {"d": "2026-12-18", "c": "국내", "t": "납입 · 신테카바이오", "s": "유상증자(제3자배정) · 1,616,814주 · 발행가 1,237원", "u": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261119000228"}, {"d": "2026-12-22", "c": "국내", "t": "신주상장 · 광진실업", "s": "유상증자(제3자배정) · 2,502,090주 · 발행가 1,199원", "u": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261119000297"}, {"d": "2027-01-05", "c": "국내", "t": "신주상장 · 신테카바이오", "s": "유상증자(제3자배정) · 1,616,814주 · 발행가 1,237원", "u": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261119000228"}, {"d": "2027-01-06", "c": "국내", "t": "신주상장 · 에넥스", "s": "유상증자(제3자배정) · 2,000,000주 · 발행가 2,500원", "u": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261119000305"}, {"d": "2027-03-12", "c": "국내", "t": "납입 · 파이온엑스", "s": "유상증자(제3자배정) · 9,416,195주 · 발행가 1,062원", "u": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261119000263"}, {"d": "2027-04-02", "c": "국내", "t": "신주상장 · 파이온엑스", "s": "유상증자(제3자배정) · 9,416,195주 · 발행가 1,062원", "u": "https://dart.fss.or.kr/dsaf001/main.do?rcpNo=20261119000263"}, {"d": "2026-11-19", "c": "미국 실적", "t": "WMT 실적발표", "s": "Walmart Inc. · 장 시작 전 · 시총 $1,012B", "u": "https://www.nasdaq.com/market-activity/stocks/wmt/earnings"}, {"d": "2026-11-19", "c": "미국 실적", "t": "BABA 실적발표", "s": "Alibaba Group Holding Limited · 장 시작 전 · 시총 $210B", "u": "https://www.nasdaq.com/market-activity/stocks/baba/earnings"}, {"d": "2026-11-19", "c": "미국 실적", "t": "PDD 실적발표", "s": "PDD Holdings Inc. · 장 시작 전 · 시총 $110B", "u": "https://www.nasdaq.com/market-activity/stocks/pdd/earnings"}, {"d": "2026-11-19", "c": "미국 실적", "t": "INTU 실적발표", "s": "Intuit Inc. · 장 마감 후 · 시총 $86B", "u": "https://www.nasdaq.com/market-activity/stocks/intu/earnings"}, {"d": "2026-11-19", "c": "미국 실적", "t": "NTES 실적발표", "s": "NetEase, Inc. · 장 시작 전 · 시총 $76B", "u": "https://www.nasdaq.com/market-activity/stocks/ntes/earnings"}, {"d": "2026-11-19", "c": "미국 실적", "t": "ROST 실적발표", "s": "Ross Stores, Inc. · 장 마감 후 · 시총 $70B", "u": "https://www.nasdaq.com/market-activity/stocks/rost/earnings"}, {"d": "2026-11-23", "c": "미국 실적", "t": "HPE 실적발표", "s": "Hewlett Packard Enterprise Company · 장 마감 후 · 시총 $61B", "u": "https://www.nasdaq.com/market-activity/stocks/hpe/earnings"}, {"d": "2026-11-24", "c": "미국 실적", "t": "DELL 실적발표", "s": "Dell Technologies Inc. · 장 마감 후 · 시총 $205B", "u": "https://www.nasdaq.com/market-activity/stocks/dell/earnings"}, {"d": "2026-11-24", "c": "미국 실적", "t": "ADI 실적발표", "s": "Analog Devices, Inc. · 장 시작 전 · 시총 $186B", "u": "https://www.nasdaq.com/market-activity/stocks/adi/earnings"}, {"d": "2026-11-24", "c": "미국 실적", "t": "MDT 실적발표", "s": "Medtronic plc · 장 시작 전 · 시총 $131B", "u": "https://www.nasdaq.com/market-activity/stocks/mdt/earnings"}, {"d": "2026-11-24", "c": "미국 실적", "t": "ADSK 실적발표", "s": "Autodesk, Inc. · 장 마감 후 · 시총 $53B", "u": "https://www.nasdaq.com/market-activity/stocks/adsk/earnings"}, {"d": "2026-11-25", "c": "미국 실적", "t": "DE 실적발표", "s": "Deere & Company · 장 시작 전 · 시총 $175B", "u": "https://www.nasdaq.com/market-activity/stocks/de/earnings"}, {"d": "2026-12-01", "c": "미국 실적", "t": "CRWD 실적발표", "s": "CrowdStrike Holdings, Inc. · 장 마감 후 · 시총 $225B", "u": "https://www.nasdaq.com/market-activity/stocks/crwd/earnings"}, {"d": "2026-12-01", "c": "미국 실적", "t": "MRVL 실적발표", "s": "Marvell Technology, Inc. · 장 마감 후 · 시총 $130B", "u": "https://www.nasdaq.com/market-activity/stocks/mrvl/earnings"}, {"d": "2026-12-02", "c": "미국 실적", "t": "CRM 실적발표", "s": "Salesforce, Inc. · 장 마감 후 · 시총 $160B", "u": "https://www.nasdaq.com/market-activity/stocks/crm/earnings"}, {"d": "2026-12-02", "c": "미국 실적", "t": "BMO 실적발표", "s": "Bank Of Montreal · 장 시작 전 · 시총 $116B", "u": "https://www.nasdaq.com/market-activity/stocks/bmo/earnings"}, {"d": "2026-12-02", "c": "미국 실적", "t": "BNS 실적발표", "s": "Bank of Nova Scotia (The) · 장 시작 전 · 시총 $109B", "u": "https://www.nasdaq.com/market-activity/stocks/bns/earnings"}, {"d": "2026-12-02", "c": "미국 실적", "t": "SNOW 실적발표", "s": "Snowflake Inc. · 장 마감 후 · 시총 $96B", "u": "https://www.nasdaq.com/market-activity/stocks/snow/earnings"}, {"d": "2026-12-03", "c": "미국 실적", "t": "RY 실적발표", "s": "Royal Bank Of Canada · 장 시작 전 · 시총 $272B", "u": "https://www.nasdaq.com/market-activity/stocks/ry/earnings"}, {"d": "2026-12-03", "c": "미국 실적", "t": "TD 실적발표", "s": "Toronto Dominion Bank (The) · 장 시작 전 · 시총 $195B", "u": "https://www.nasdaq.com/market-activity/stocks/td/earnings"}, {"d": "2026-12-03", "c": "미국 실적", "t": "CM 실적발표", "s": "Canadian Imperial Bank of Commerce · 장 시작 전 · 시총 $102B", "u": "https://www.nasdaq.com/market-activity/stocks/cm/earnings"}, {"d": "2026-12-08", "c": "미국 실적", "t": "SNPS 실적발표", "s": "Synopsys, Inc. · 장 마감 후 · 시총 $83B", "u": "https://www.nasdaq.com/market-activity/stocks/snps/earnings"}, {"d": "2026-12-08", "c": "미국 실적", "t": "AZO 실적발표", "s": "AutoZone, Inc. · 장 시작 전 · 시총 $53B", "u": "https://www.nasdaq.com/market-activity/stocks/azo/earnings"}, {"d": "2026-12-09", "c": "미국 실적", "t": "AVGO 실적발표", "s": "Broadcom Inc. · 장 마감 후 · 시총 $1,631B", "u": "https://www.nasdaq.com/market-activity/stocks/avgo/earnings"}, {"d": "2026-12-09", "c": "미국 실적", "t": "ORCL 실적발표", "s": "Oracle Corporation · 시간 미정 · 시총 $348B", "u": "https://www.nasdaq.com/market-activity/stocks/orcl/earnings"}, {"d": "2026-12-09", "c": "미국 실적", "t": "ADBE 실적발표", "s": "Adobe Inc. · 장 마감 후 · 시총 $92B", "u": "https://www.nasdaq.com/market-activity/stocks/adbe/earnings"}, {"d": "2026-12-10", "c": "미국 실적", "t": "COST 실적발표", "s": "Costco Wholesale Corporation · 장 마감 후 · 시총 $492B", "u": "https://www.nasdaq.com/market-activity/stocks/cost/earnings"}, {"d": "2026-12-16", "c": "미국 실적", "t": "MU 실적발표", "s": "Micron Technology, Inc. · 시간 미정 · 시총 $806B", "u": "https://www.nasdaq.com/market-activity/stocks/mu/earnings"}, {"d": "2026-12-17", "c": "미국 실적", "t": "ACN 실적발표", "s": "Accenture plc · 장 시작 전 · 시총 $160B", "u": "https://www.nasdaq.com/market-activity/stocks/acn/earnings"}, {"d": "2026-12-17", "c": "미국 실적", "t": "CTAS 실적발표", "s": "Cintas Corporation · 시간 미정 · 시총 $88B", "u": "https://www.nasdaq.com/market-activity/stocks/ctas/earnings"}, {"d": "2026-12-17", "c": "미국 실적", "t": "NKE 실적발표", "s": "Nike, Inc. · 시간 미정 · 시총 $53B", "u": "https://www.nasdaq.com/market-activity/stocks/nke/earnings"}];
+const CATS = ["전체", "국내", "미국 지표", "미국 실적"];
+const pad = n => String(n).padStart(2, "0");
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const todayIso = iso(new Date());
+let cat = "전체", sel = todayIso, view = new Date();
+view.setDate(1);
+
+const byDay = () => {
+  const m = {};
+  for (const e of EV) if (cat === "전체" || e.c === cat) (m[e.d] = m[e.d] || []).push(e);
+  return m;
+};
+
+function renderTabs() {
+  const t = document.getElementById("tabs");
+  t.innerHTML = "";
+  for (const c of CATS) {
+    const b = document.createElement("button");
+    b.textContent = c;
+    b.className = c === cat ? "on" : "";
+    b.onclick = () => { cat = c; render(); };
+    t.appendChild(b);
+  }
+}
+
+function renderGrid() {
+  const m = byDay();
+  document.getElementById("month").textContent = `${view.getFullYear()}년 ${view.getMonth() + 1}월`;
+  const g = document.getElementById("grid");
+  g.innerHTML = "";
+  for (const w of "일월화수목금토") {
+    const h = document.createElement("div");
+    h.className = "wd"; h.textContent = w; g.appendChild(h);
+  }
+  const start = new Date(view); start.setDate(1 - view.getDay());
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(start); d.setDate(start.getDate() + i);
+    const k = iso(d), list = m[k] || [];
+    const cell = document.createElement("button");
+    cell.className = "day" + (d.getMonth() !== view.getMonth() ? " out" : "") + (k === todayIso ? " today" : "") + (k === sel ? " sel" : "");
+    cell.innerHTML = `<div class="n">${d.getDate()}</div>`
+      + list.slice(0, 3).map(e => `<div class="ev">${esc(e.t)}</div>`).join("")
+      + (list.length > 3 ? `<div class="more">+${list.length - 3}</div>` : "")
+      + (list.length ? `<div class="cnt">${list.length}건</div>` : "");
+    cell.onclick = () => { sel = k; render(); };
+    g.appendChild(cell);
+  }
+}
+
+function renderSide() {
+  const list = byDay()[sel] || [];
+  const d = new Date(sel + "T00:00:00");
+  const s = document.getElementById("side");
+  s.innerHTML = `<h2>${d.getMonth() + 1}월 ${d.getDate()}일 (${"일월화수목금토"[d.getDay()]})</h2>`
+    + (list.length ? list.map(e => `<div class="item"><div class="cat">${esc(e.c)}</div><div class="tt">${esc(e.t)}</div><div class="ss">${esc(e.s)}</div>${e.u ? `<a href="${e.u}" target="_blank" rel="noopener">원문 보기</a>` : ""}</div>`).join("")
+      : `<div class="empty">이 날은 일정이 없어요.</div>`);
+}
+
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function render() { renderTabs(); renderGrid(); renderSide(); }
+document.getElementById("prev").onclick = () => { view.setMonth(view.getMonth() - 1); render(); };
+document.getElementById("next").onclick = () => { view.setMonth(view.getMonth() + 1); render(); };
+render();
+</script>
+</body>
+</html>
